@@ -28,12 +28,11 @@ fn parse_crate(line: &str) -> Vec<char> {
 }
 
 fn main() {
-    let input = include_str!("input.txt");
+    let input = include_str!("my_input.txt");
     let mut parse_state = ParseState::Stacks;
-
     let mut stacks: Vec<Vec<char>> = Vec::new();
 
-    for (i, line) in input.lines().enumerate() {
+    for line in input.lines() {
         if line.starts_with(" 1") {
             for s in stacks.iter_mut() {
                 s.reverse();
@@ -45,7 +44,7 @@ fn main() {
                 ParseState::Stacks => {
                     let out = parse_crate(line);
 
-                    dbg!(stacks.len());
+                    // dbg!(stacks.len());
                     if stacks.len() == 0 {
                         stacks = vec![Vec::new(); out.len()];
                     }
@@ -55,11 +54,47 @@ fn main() {
                             stacks[i].push(*c);
                         }
                     }
-                    println!("{:?} {}", out, i + 1);
+                    // println!("{:?} Line: {}", out, i + 1);
                 }
-                ParseState::Instructions => println!("Need inst. parser!"),
+                ParseState::Instructions => {
+                    let sections: Vec<_> = line.split(" ").collect();
+                    let move_num = sections
+                        .iter()
+                        .skip(1)
+                        .next()
+                        .unwrap()
+                        .parse::<usize>()
+                        .unwrap();
+                    let from = sections
+                        .iter()
+                        .skip(3)
+                        .next()
+                        .unwrap()
+                        .parse::<usize>()
+                        .unwrap();
+                    let to = sections
+                        .iter()
+                        .skip(5)
+                        .next()
+                        .unwrap()
+                        .parse::<usize>()
+                        .unwrap();
+
+                    for _moves in 0..move_num {
+                        let pop = stacks[from - 1].pop().unwrap();
+                        stacks[to - 1].push(pop);
+                    }
+                }
             }
         }
     }
-    println!("{:?}", stacks);
+
+    for (i, s) in stacks.iter().enumerate() {
+        println!("Stack {}: {}", i + 1, String::from_iter(s.iter()))
+    }
+
+    print!("Top crates: ");
+    for s in stacks {
+        print!("{}", s.last().unwrap());
+    }
 }
