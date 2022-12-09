@@ -1,3 +1,8 @@
+#[allow(dead_code)]
+enum CrateMover {
+    Model9000,
+    Model9001,
+}
 enum ParseState {
     Stacks,
     Instructions,
@@ -28,7 +33,9 @@ fn parse_crate(line: &str) -> Vec<char> {
 }
 
 fn main() {
-    let input = include_str!("my_input.txt");
+    let crane_select = CrateMover::Model9001;
+
+    let input = include_str!("input.txt");
     let mut parse_state = ParseState::Stacks;
     let mut stacks: Vec<Vec<char>> = Vec::new();
 
@@ -44,7 +51,6 @@ fn main() {
                 ParseState::Stacks => {
                     let out = parse_crate(line);
 
-                    // dbg!(stacks.len());
                     if stacks.len() == 0 {
                         stacks = vec![Vec::new(); out.len()];
                     }
@@ -54,7 +60,6 @@ fn main() {
                             stacks[i].push(*c);
                         }
                     }
-                    // println!("{:?} Line: {}", out, i + 1);
                 }
                 ParseState::Instructions => {
                     let sections: Vec<_> = line.split(" ").collect();
@@ -80,21 +85,43 @@ fn main() {
                         .parse::<usize>()
                         .unwrap();
 
-                    for _moves in 0..move_num {
-                        let pop = stacks[from - 1].pop().unwrap();
-                        stacks[to - 1].push(pop);
+                    // println!("Move {} from {} to {}", move_num, from, to);
+
+                    match crane_select {
+                        CrateMover::Model9000 => {
+                            for _moves in 0..move_num {
+                                let pop = stacks[from - 1].pop().unwrap();
+                                stacks[to - 1].push(pop);
+                            }
+                        }
+                        CrateMover::Model9001 => {
+                            let mut move_crates: Vec<char> = Vec::new();
+                            for _moves in 0..move_num {
+                                // let moved = stacks[from - 1].pop().unwrap();
+                                move_crates.push(stacks[from - 1].pop().unwrap());
+                            }
+
+                            for _moves in 0..move_num {
+                                // let pop = move_crates.pop().unwrap();
+                                stacks[to - 1].push(move_crates.pop().unwrap());
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    for (i, s) in stacks.iter().enumerate() {
-        println!("Stack {}: {}", i + 1, String::from_iter(s.iter()))
-    }
+    print_stacks(&stacks);
 
     print!("Top crates: ");
     for s in stacks {
         print!("{}", s.last().unwrap());
+    }
+}
+
+fn print_stacks(stacks: &Vec<Vec<char>>) {
+    for (i, s) in stacks.iter().enumerate() {
+        println!("Stack {}: {}", i + 1, String::from_iter(s.iter()))
     }
 }
